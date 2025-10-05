@@ -906,64 +906,61 @@
     }
   }
 
-  /**
-   * Call OpenAI API
-   */
-  function callOpenAI(message, systemContext, apiKey) {
-    var model = ghostChatState.config.provider.split(':')[1] || 'gpt-3.5-turbo';
-    
-    var messages = [
-      { role: 'system', content: systemContext + 'You are a helpful assistant.' }
-    ].concat(ghostChatState.messages.slice(0, -1)).concat([
-      { role: 'user', content: message }
-    ]);
+ /**
+ * Call OpenRouter API (replacing OpenAI logic)
+ */
+function callOpenAI(message, systemContext, apiKey) {
+  var model = ghostChatState.config.provider.split(':')[1] || 'deepseek/deepseek-chat';
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.openai.com/v1/chat/completions', true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.setRequestHeader('Authorization', 'Bearer ' + apiKey);
+  var messages = [
+    { role: 'system', content: systemContext + 'You are a helpful assistant.' }
+  ].concat(ghostChatState.messages.slice(0, -1)).concat([
+    { role: 'user', content: message }
+  ]);
 
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4) {
-        removeLoadingMessage();
-        
-        if (xhr.status === 200) {
-          try {
-            var response = JSON.parse(xhr.responseText);
-            var reply = response.choices[0].message.content;
-            addMessage(reply, 'bot');
-          } catch (e) {
-            addMessage('I apologize, but I encountered an error processing the response. Please try again.', 'bot');
-            console.error('[GhostChat] Parse error:', e);
-          }
-        } else if (xhr.status === 401) {
-          addMessage('Sorry, there seems to be an authentication issue. Please check your API key configuration.', 'bot');
-          console.error('[GhostChat] API authentication failed');
-        } else if (xhr.status === 429) {
-          addMessage('I\'m receiving too many requests right now. Please wait a moment and try again.', 'bot');
-          console.error('[GhostChat] Rate limit exceeded');
-        } else if (xhr.status === 500 || xhr.status === 503) {
-          addMessage('The AI service is temporarily unavailable. Please try again in a moment.', 'bot');
-          console.error('[GhostChat] API server error:', xhr.status);
-        } else {
-          addMessage('I\'m having trouble connecting right now. Please try again later.', 'bot');
-          console.error('[GhostChat] API error:', xhr.status, xhr.responseText);
-        }
-      }
-    };
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'https://openrouter.ai/api/v1/chat/completions', true);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Authorization', 'Bearer ' + apiKey);
+  xhr.setRequestHeader('HTTP-Referer', window.location.origin); // Required by OpenRouter
+  xhr.setRequestHeader('X-Title', 'GhostChat Widget');
 
-    xhr.onerror = function() {
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
       removeLoadingMessage();
-      addMessage('Unable to connect to the AI service. Please check your internet connection.', 'bot');
-      console.error('[GhostChat] Network error');
-    };
+      
+      if (xhr.status === 200) {
+        try {
+          var response = JSON.parse(xhr.responseText);
+          var reply = response.choices[0].message.content;
+          addMessage(reply, 'bot');
+        } catch (e) {
+          addMessage('I apologize, but I encountered an error processing the response. Please try again.', 'bot');
+          console.error('[GhostChat] Parse error:', e);
+        }
+      } else if (xhr.status === 401) {
+        addMessage('Invalid OpenRouter API key.', 'bot');
+      } else if (xhr.status === 429) {
+        addMessage('Rate limit exceeded. Try again later.', 'bot');
+      } else {
+        addMessage('Error processing your request.', 'bot');
+        console.error('[GhostChat] API error:', xhr.status, xhr.responseText);
+      }
+    }
+  };
 
-    xhr.send(JSON.stringify({
-      model: model,
-      messages: messages,
-      temperature: 0.7
-    }));
-  }
+  xhr.onerror = function() {
+    removeLoadingMessage();
+    addMessage('Unable to connect to the AI service. Please check your internet connection.', 'bot');
+  };
+
+  xhr.send(JSON.stringify({
+    model: model,
+    messages: messages,
+    temperature: 0.7,
+    max_tokens: 500
+  }));
+}
 
   /**
    * Call Anthropic API
