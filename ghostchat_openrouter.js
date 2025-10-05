@@ -893,9 +893,9 @@
       temperature: 0.7,
       max_tokens: 500
     }));
+  }
 
-
-    // Expose global function
+  // ✅ Make initGhostChat available globally
   window.initGhostChat = initGhostChat;
 
 })(window);
