@@ -9,6 +9,17 @@
 
 (function(window) {
   'use strict';
+// Utility: Deep merge of default options and user options
+function mergeOptions(defaults, options) {
+  var result = {};
+  for (var key in defaults) {
+    result[key] = defaults[key];
+  }
+  for (var key in options) {
+    result[key] = options[key];
+  }
+  return result;
+}
 
   // Configuration constants
   var TIERS = {
