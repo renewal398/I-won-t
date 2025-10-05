@@ -23,12 +23,12 @@
     AGENCY: ['minimal-light', 'minimal-dark', 'glassmorphism', 'terminal-console', 'ghost-orb']
   };
 
-  var PROVIDERS = {
-    FREE: ['openai:gpt-3.5'],
-    PERSONAL: ['openai:gpt-3.5', 'openai:gpt-4', 'anthropic:claude'],
-    AGENCY: ['openai:gpt-3.5', 'openai:gpt-4', 'openai:gpt-4-turbo', 'anthropic:claude', 
-             'anthropic:claude-opus', 'google:gemini', 'ollama', 'webllm']
-  };
+ var PROVIDERS = {
+  FREE: ['openrouter:deepseek/deepseek-chat'],
+  PERSONAL: ['openrouter:deepseek/deepseek-chat', 'openrouter:anthropic/claude-3-haiku', 'openrouter:meta-llama/llama-3-8b-instruct'],
+  AGENCY: ['openrouter:deepseek/deepseek-chat', 'openrouter:anthropic/claude-3-sonnet', 'openrouter:google/gemini-pro', 'openrouter:meta-llama/llama-3-70b-instruct']
+};
+
 
   var CONTEXT_MODES = {
     PERSONAL: ['faq', 'summarize'],
